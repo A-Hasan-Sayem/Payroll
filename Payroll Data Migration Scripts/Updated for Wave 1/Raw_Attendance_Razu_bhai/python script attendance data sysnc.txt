@@ -1,0 +1,62 @@
+import pyodbc
+
+# Connection strings
+source_conn_str = (
+    "Driver={ODBC Driver 17 for SQL Server};"
+    "Server=35.240.179.2;"
+    "Database=AttendanceData;"
+    "UID=reader_payroll;"
+    "PWD=Reader$payroll321#;"
+)
+
+dest_conn_str = (
+    "Driver={PostgreSQL Unicode(x64)};"
+    "Server=35.221.232.213;"
+    "Port=5432;"
+    "Database=attendance_raw_data;"
+    "UID=razu;"
+    "PWD=razU1*;"
+)
+
+# Connect to the source database
+source_conn = pyodbc.connect(source_conn_str)
+source_cursor = source_conn.cursor()
+
+# Connect to the destination database
+dest_conn = pyodbc.connect(dest_conn_str)
+dest_cursor = dest_conn.cursor()
+
+try:
+    # Extract data from the source database
+    source_cursor.execute("Select a.Pin,a.punchdate,a.punchdatetime,a.Machine_id from [AttendanceData].dbo.[attendance_punch_data] a")
+    attendance_data = source_cursor.fetchall()
+
+    # Prepare insert statement for the destination database
+    insert_query = """
+    INSERT INTO attendance_raw_data_new (id,version,empl_id_machine,atten_date,atten_date_time,processed,machine_code,created_by,created_date)
+    SELECT gen_random_uuid() as id,1 as version,?,?,?,0,?,'backend_job',now()
+    """
+
+    # Insert data into the destination database
+    for row in attendance_data:
+        dest_cursor.execute(insert_query, row)
+
+    # Commit the transaction
+    dest_conn.commit()
+
+    # delete_query = "DELETE FROM [AttendanceData].dbo.[attendance_punch_data] "
+    # source_cursor.execute(delete_query)
+    source_conn.commit()
+
+    print("Data transfer successful!")
+
+except Exception as e:
+    print(f"Error: {e}")
+    dest_conn.rollback()  # Rollback in case of error
+
+finally:
+    # Close connections
+    source_cursor.close()
+    source_conn.close()
+    dest_cursor.close()
+    dest_conn.close()

@@ -1,0 +1,68 @@
+select * from mdg_pr_payment_method;
+select * from integ_employment_status_map;
+select * from integ_separation_type_map;
+select * from mdg_company;
+select * from mdg_country;
+select * from mdg_continent;
+select * from mdg_religion;
+select * from mdg_currency;
+select * from mdg_business_industry;
+select * from mdg_functional_area;
+
+select * from mdg_job_grade;
+select * from mdg_empl_job_grade;
+select * from hmd_empl_grade_sub;
+
+select * from mdg_holiday;
+select * from mdg_holiday_calendar;
+select * from mdg_holiday_calendar_day;
+select * from mdg_holiday_calendar_detail;
+select * from mdg_holiday_calendar_week_end;
+select * from mdg_holiday_calendar_day_float;
+
+select * from hmd_employee_group;
+select * from hmd_empl_category;
+select * from hmd_empl_category_comp_rule;
+select * from hmd_empl_cat_work_away_rule;
+
+select * from mdg_leave_year;
+select * from hmd_leave_type;
+select * from hmd_leave_profile;
+select * from hmd_leave_profile_line;
+select * from hmd_leave_profile_line_elig;
+select * from hmd_leave_profile_line_limit;
+select * from hmd_late_penalty;
+select * from hmd_late_penalty_criteria;
+select * from hmd_absent_penalty;
+select * from hmd_absent_penalty_criteria;
+select * from hmd_calc_method;
+select * from mdg_seniority_loss_rule;
+select * from mdg_punctual_attend_criteria;
+
+select * from mdg_work_shift;
+select * from mdg_work_shift_rotate_rule;
+select * from mdg_work_shift_rotate_line;
+select * from mdg_punctual_attend_criteria;
+
+ 
+select * from mdg_ot_rounding_rule;
+select * from mdg_ot_rounding_rule_line;
+
+select * from hmd_leave_entitle_calc_method_rule;
+select * from hmd_leave_entitle_calc_method_line;
+
+-- Run This query after Employee Migration
+
+-- resource role table
+select * from sec_resource_role;
+select * from sec_resource_policy;
+-- row level role table
+select * from sec_row_level_policy;
+select * from sec_row_level_role;
+
+
+
+
+
+
+

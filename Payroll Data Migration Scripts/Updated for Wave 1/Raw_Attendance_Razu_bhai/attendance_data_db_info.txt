@@ -1,0 +1,43 @@
+CREATE DATABASE attendance_raw_data;
+
+create table attendance_raw_data_new
+(
+    id              uuid,
+    version         integer     not null,
+    empl_id_machine varchar(10),
+    atten_date      date,
+    atten_date_time timestamp,
+    processed       integer     not null,
+    machine_code    varchar(4),
+    created_by      varchar(11) not null,
+    created_date    timestamp   not null
+);
+
+CREATE TABLE attendance_raw_data_archive (
+	id              uuid,
+    version         integer     not null,
+    empl_id_machine varchar(10),
+    atten_date      date,
+    atten_date_time timestamp,
+    processed       integer     not null,
+    machine_code    varchar(4),
+    created_by      varchar(11) not null,
+    created_date    timestamp   not null,
+	archive_date timestamp   not null
+);
+
+
+INSERT INTO public.hr_attend_log (id, version, empl_id_machine, atten_date, atten_date_time, processed, machine_code)
+select  gen_random_uuid(),1,empl_id_machine , atten_date,atten_date_time, false,machine_code
+from attendance_raw_data.public.attendance_raw_data_new;
+
+insert into public.attendance_raw_data_archive
+select *,now() as archive_date  from attendance_raw_data.public.attendance_raw_data_new;
+
+delete from public.attendance_raw_data_new;
+
+
+INSERT INTO attendance_raw_data_new (id,version,empl_id_machine,atten_date,atten_date_time,processed,machine_code,created_by,created_date)
+    SELECT gen_random_uuid() as id,1 as version, LPAD(CAST(pin AS TEXT), 8, '0') pin,cast(punchdate as DATE) ,CAST(punchdatetime as timestamp),0,machine_id,'backend_job',now()
+from attendance_raw_data_03_feb_2025 ;
+
