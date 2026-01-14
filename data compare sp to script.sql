@@ -1,4 +1,4 @@
-with cte as (SELECT
+with altercte as (SELECT
     l.employeeid,
     l.loanno,
     l.rownumber,
@@ -27,5 +27,8 @@ FROM sp_employee_loanrealizationreport l JOIN sp_employee_loanrealizationreport2
   ON l.employeeid = c.employeeid
  AND l.loanno     = c.loanno
  AND l.rownumber  = c.rownumber)
-select * from cte
-where period_match = False or openbalance_match = False or installment_match = False or intoutstanding_match  = False or interest_match = False or principal_match = False or closebalance_match = False
+select * from altercte
+where period_match = False or openbalance_match = False or installment_match = False or intoutstanding_match  = False or
+      interest_match = False or principal_match = False or closebalance_match = False
+
+
