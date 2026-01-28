@@ -36,11 +36,11 @@ INSERT INTO LM_LOAN_APP (
     OVERRIDE_FLAG,
     COMMENTS
 )
-with loan_app as (select employeeid, applicationno,loanno,loanid, applieddate, appliedamount, remarks, applicationstatus, noofinstallment, installmentamount
+with loan_app as (select employeeid, applicationno,loanno,loanid, applieddate, appliedamount, remarks, applicationstatus, noofinstallment, installmentamount, mcusagetype
 from "Airbyte".loan_loanapplication
 where applicationstatus = 'A'
 UNION
-SELECT lam.employeeid,applicationid, lam.slno AS loanno,lam.loanid,lam.applieddate,lam.appliedamt,lam.remarks,'A' AS applicationstatus,NULL AS noofinstallment,NULL AS installmentamount
+SELECT lam.employeeid,applicationid, lam.slno AS loanno,lam.loanid,lam.applieddate,lam.appliedamt,lam.remarks,'A' AS applicationstatus,NULL AS noofinstallment,NULL AS installmentamount, NULL as mcusagetype
 FROM "Airbyte".loan_loanapplication_manual lam left join "Airbyte".loan_loanapplication la on lam.slno = la.loanno
 WHERE applicationapprovedyn = 1 and la.loanno is null and lam.slno is not null)
 SELECT
@@ -65,7 +65,10 @@ SELECT
     NULL::varchar AS DOC_NAME,
     40::integer AS PROCESS_STATE, --APPROVED(40)
     NULL::varchar AS APPROVER_USERNAME,
-    sal.id::uuid AS SPL_ALLOW_LEVEL_ID, -- only if applicable
+    (CASE la.mcusagetype WHEN '01' THEN '0195ff5f-98b2-7954-94c0-884751582369'
+    WHEN '02' THEN '0195ff5f-cc62-7988-aad4-b047a1f95480'
+    WHEN '03' THEN '0195ff5f-f815-7e39-af9c-08ae7b74c137'
+    WHEN '04' THEN '019bb734-fb56-7f99-a94a-f5ee3462d617' ELSE NULL END)::uuid AS SPL_ALLOW_LEVEL_ID, -- Change these 4 uuid with live table uuid, or join with spl.level_ then take id from that table
     NULL::timestamp with time zone AS APPROVER_DATE,
     NULL::timestamp with time zone AS CANCEL_DATE,
     NULL::uuid AS LOAN_ACCT_MERGE_ID,
@@ -84,7 +87,7 @@ FROM  "Airbyte".loan_loanemployee le left join  loan_app la on le.loanno = la.lo
     JOIN payroll_leave_attend_data.employee_records_all ie ON ie.pin = la.employeeid
     JOIN public.mdg_empl_profile ep ON ep.employee_code = ie.pin
     LEFT JOIN "Airbyte".loan_loanemployee le ON le.loanno = la.loanno
-    LEFT JOIN public.SPL_ALLOW_LEVEL sal ON sal.loan_type_id = la.loanid
+    --LEFT JOIN public.HMD_SPL_ALLOW_LEVEL sal ON sal.level_ = la.mcusagetype
     LEFT JOIN public.LM_LOAN_ACCT d_le ON d_le.LOAN_NO = le.loanno
 where le.loanstatusid = 1 and le.is_disbursed = 1;
 
