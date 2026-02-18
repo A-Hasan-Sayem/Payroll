@@ -59,7 +59,7 @@ SELECT
     ep.id::uuid AS EMPL_PROFILE_ID,
     d_lt.id::uuid AS LOAN_TYPE_ID,
     la.remarks::text AS LOAN_PURPOSE,
-    la.APPLIEDAMOUNT::double precision AS AMOUNT, --make sure where will it come from la or le
+    coalesce(la.APPLIEDAMOUNT, le.principleamt)::double precision AS AMOUNT,
     le.noinstallment::integer AS NO_OF_INSTALLMENT,
     le.installmentamt::double precision AS AMOUNT_INSTALLMENT,
     NULL::bytea AS DOC_IMAGE,
@@ -82,11 +82,12 @@ SELECT
     NULL::boolean AS OVERRIDE_FLAG,
     NULL::varchar as COMMENTS
 FROM  "Airbyte".loan_loanemployee le left join  loan_app la on le.loanno = la.loanno
-    JOIN payroll_leave_attend_data.employee_records_all ie ON ie.pin = la.employeeid -- will eventuall join with destination live table mdg_empl_profile
+    JOIN payroll_leave_attend_data.employee_records_all ie ON ie.pin = la.employeeid -- will eventually join with destination live table mdg_empl_profile
     JOIN public.mdg_empl_profile ep ON ep.employee_code = ie.pin
     LEFT JOIN "Airbyte".loan_loanemployee le ON le.loanno = la.loanno
     LEFT JOIN public.HMD_SPL_ALLOW_LEVEL sal ON sal.level_ = la.mcusagetype
     LEFT JOIN public.LM_LOAN_ACCT d_le ON d_le.LOAN_NO = le.loanno
     LEFT JOIN public.LM_LOAN_TYPE d_lt on le.loanid = d_lt.loan_type_code
-where le.loanstatusid = 1 and le.is_disbursed = 1;
+where le.loanstatusid = 1 and le.is_disbursed = 1
+  and ep.employment_status in (20,30,40) -- NOT_JOINED_YET(10),ACTIVE_EMPLOYMENT(20),LONG_TERM_LEAVE(30),SEPARATION_IN_PROCESS(40),SEPARATED(50);
 
